@@ -1,0 +1,25 @@
+// Admin phone step
+if (state?.step === "admin_awaiting_phone") {
+  const phone = text.trim();
+  await sendOtpForUser(`admin_${userId}`, phone); // alag key use hoti hai
+  pendingState.set(fromId, { step: "admin_awaiting_otp", phone });
+  await bot.sendMessage(chatId, m.otpSent(phone), { parse_mode: "HTML", reply_markup: cancelKeyboard() });
+  return;
+}
+
+// Admin OTP verify
+if (state?.step === "admin_awaiting_otp") {
+  const result = await verifyOtpForUser(`admin_${userId}`, text);
+  if (result === "2fa_needed") {
+    pendingState.set(fromId, { step: "admin_awaiting_2fa", phone: state.phone });
+    await bot.sendMessage(chatId, m.twoFaNeeded, ...);
+  } else {
+    // Session DB mein save hota hai adminSessionsTable mein
+    await db.insert(adminSessionsTable).values({
+      phoneNumber: state.phone,
+      sessionString: result,
+      label: state.phone,
+    });
+    await bot.sendMessage(chatId, m.adminAccountAdded(state.phone), ...);
+  }
+}
