@@ -45,4 +45,4 @@ export function backKeyboard(): TelegramBot.InlineKeyboardMarkup {
 
 export function cancelKeyboard(): TelegramBot.InlineKeyboardMarkup {
   return { inline_keyboard: [[{ text: "❌ Cancel", callback_data: "dashboard" }]] };
-}
+      }
